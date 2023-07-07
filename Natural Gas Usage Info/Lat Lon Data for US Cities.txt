@@ -1,0 +1,13 @@
+CA: 4,002,350.00 - Los Angeles - 	34	118		
+NY: 3,882,713.00 - New York City - 	40	73
+IL: 3,752,420.00 - Chicago - 		41	87
+MI: 2,848,330.00 - Detroit - 		42	83
+OH: 2,546,075.00 - Columbus - 		40	83
+PA: 2,062,704.00 - Philadelphia - 	39	75	
+NJ: 2,039,800.00 - Newark -		40	74
+TX: 1,817,635.00 - Houston - 		29	95
+IN: 1,217,694.00 - Indianapolis - 	39	86
+WI: 1,214,826.00 - Milwaukee - 		43	87	
+
+
+Source: https://www.infoplease.com/us/geography/latitude-and-longitude-us-and-canadian-cities
