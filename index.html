@@ -1,11 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+      <!-- Include the Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-    
+    <!-- Year and City selection drop-down boxes -->
+  <label for="year">Select Year:</label>
+  <select id="year">
+    <option value="2019">2019</option>
+    <option value="2020">2020</option>
+    <option value="2021">2021</option>
+    <!-- Add more options as needed -->
+  </select>
+
+  <label for="city">Select City:</label>
+  <select id="city">
+    <option value="New York">New York</option>
+    <option value="London">London</option>
+    <option value="Tokyo">Tokyo</option>
+    <!-- Add more options as needed -->
+  </select>
+
+  <!-- Placeholder divs for the charts -->
+  <div id="priceChart"></div>
+  <div id="temperatureChart"></div>
+    <!--these calls are for our javascript (logic) and for Highcharts-->
+    <script src="static/logic.js"></script>    
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <!--d3, plotly, leaflet-->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
 </body>
 </html>
