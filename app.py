@@ -6,6 +6,7 @@ import json
 import os
 from flask import Flask, jsonify
 
+
 #Natural Gas dependencies
 import yfinance as yf
 import pandas as pd
@@ -25,7 +26,7 @@ app = Flask(__name__)
 # Gather the weather data and jsonify 
 @app.route("/weather/jsonified")
 
-def weather_data():
+def weather_data_route():
 
     #This function extracts temperature data for Dec-Feb from the dataset and converts it to Fahrenheit
     def extract_temperature_data(weather_data):
