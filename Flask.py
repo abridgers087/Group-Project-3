@@ -40,5 +40,32 @@ def weather(city):
     # Return the weather data as JSON
     return jsonify(weather_list)
 
+@app.route("/futures_data/Winter<int:winter_number>")
+def futures(winter_number):
+    winter_label = f"Winter {winter_number}"
+    
+    # Query the futures data
+    futures_data = db.futures_data.find({"Label": winter_label})
+
+    # Convert the queried data into a list of dictionaries
+    futures_list = []
+    for data in futures_data:
+        futures_list.append({
+            'Winter': data['Label'],
+            'Date': data['Date'],
+            'Open': data['Open'],
+            'High': data['High'],
+            'Low': data['Low'],
+            'Close': data['Close'],
+            'Adj_Close': data['Adj_Close'],
+            'Volume': data['Volume'],
+            'ATR': data['ATR']
+        })
+
+    # Return the futures data as JSON
+    return jsonify(futures_list)
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
