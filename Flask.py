@@ -1,9 +1,3 @@
-import numpy as np
-import sqlalchemy
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func
-
 from flask import Flask, jsonify
 import pymongo
 from flask_cors import CORS
@@ -22,7 +16,7 @@ def welcome():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
-        f"/weather_data<br/>"
+        f"/weather_data/(city name)<br/>"
         f"/futures_data<br/>"
         f"/graph_data<br/>"
     )
