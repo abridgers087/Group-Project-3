@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import pymongo
 from flask_cors import CORS
 from datetime import datetime
-from bson import ObjectId
+from dateutil.parser import parse as parse_date
 
 # MongoDB Setup
 client = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -24,24 +24,31 @@ def welcome():
 
 @app.route("/weather_data/<city>")
 def weather(city):
+    # Convert the city name to lowercase
+    city = city.lower()
+
     # Query the weather data
-    weather_data = db.weather_data.find({"city": city})
+    weather_data = db.weather_data.find({"city": {"$regex": f"^{city}$", "$options": "i"}}).sort("date", 1)
 
     # Convert the queried data into a list of dictionaries
     weather_list = []
+    winter_start_dates = [datetime(2010, 12, 1), datetime(2011, 12, 1)]
     for data in weather_data:
         # Get the ObjectId and convert it to a string
         data['_id'] = str(data['_id'])
 
         # Get the date from the data entry
         date_str = data['date']
-        date = datetime.strptime(date_str, "%Y-%m-%d")
+        date = parse_date(date_str)
 
         # Determine the winter number based on the date
-        if date.month in [12, 1, 2]:
-            winter_number = date.year - 2010
-        else:
-            winter_number = date.year - 2011 + 1
+        winter_number = None
+        for i, start_date in enumerate(winter_start_dates, start=1):
+            if date >= start_date:
+                winter_number = i
+
+        if winter_number is None:
+            continue
 
         # Add the 'Winter' label to the data entry
         winter_label = f"Winter {winter_number}"
