@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
 import pymongo
 from flask_cors import CORS
+from datetime import datetime
+from bson import ObjectId
 
 # MongoDB Setup
 client = pymongo.MongoClient("mongodb://localhost:27017/")
@@ -28,13 +30,25 @@ def weather(city):
     # Convert the queried data into a list of dictionaries
     weather_list = []
     for data in weather_data:
-        weather_list.append({
-            'city': city,
-            'date': data['date'],
-            'tavg_fahrenheit': data['tavg_fahrenheit'],
-            'tmin_fahrenheit': data['tmin_fahrenheit'],
-            'tmax_fahrenheit': data['tmax_fahrenheit']
-        })
+        # Get the ObjectId and convert it to a string
+        data['_id'] = str(data['_id'])
+
+        # Get the date from the data entry
+        date_str = data['date']
+        date = datetime.strptime(date_str, "%Y-%m-%d")
+
+        # Determine the winter number based on the date
+        if date.month in [12, 1, 2]:
+            winter_number = date.year - 2010
+        else:
+            winter_number = date.year - 2011 + 1
+
+        # Add the 'Winter' label to the data entry
+        winter_label = f"Winter {winter_number}"
+        data['Winter'] = winter_label
+
+        # Append the modified data entry to the list
+        weather_list.append(data)
 
     # Return the weather data as JSON
     return jsonify(weather_list)
