@@ -17,8 +17,7 @@ def welcome():
     return (
         f"Available Routes:<br/>"
         f"/weather_data/(city name)<br/>"
-        f"/futures_data<br/>"
-        f"/graph_data<br/>"
+        f"/futures_data<br/>"        
     )
 
 @app.route("/weather_data/<city>")
