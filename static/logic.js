@@ -134,6 +134,7 @@ setTimeout(function() {
     success: function (activity) {
 
         activity = JSON.parse(activity);
+        console.log(activity);
         activity.datasets.forEach(function (dataset, i) {
 
             // Add X values
