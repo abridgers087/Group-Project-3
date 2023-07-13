@@ -41,7 +41,7 @@ winterData.forEach(({ year, variableName, winterNumber }) => {
     window[variableName] = data
   })
   // Append the city as an option to the select element
-  d3.select("#year").append("option").attr("value", year).text(year)
+  d3.select("#year-dropdown").append("option").attr("value", variableName).text(year)
 })
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ function ATRLine (dataset) {
           dataGrouping: {
               units: [
                   [
-                      'day', // unit name
+                      'week', // unit name
                       [1] // allowed multiples
                   ], 
               ]
@@ -188,7 +188,7 @@ function candleStick(dataset) {
         dataGrouping: {
           units: [
             [
-              "day", // unit name
+              "week", // unit name
               [1], // allowed multiples
             ],
           ],
@@ -202,30 +202,55 @@ function candleStick(dataset) {
 // update plot based on year selected in dropdown
 // not working properly
 function updatePlot() {
-  // Use D3 to select the dropdown menu
-  let dropdownMenu = d3.select("#year")
+  let selectedWinter;
 
-  // Assign the value of the dropdown menu option to a variable
-  let selected_year = dropdownMenu.property("value")
+  // Get the dropdown element
+  let dropdown = document.getElementById('year-dropdown');
 
-  // finds price data for year selected
-  // code below not working properly
-  if (selected_year === "2012-2013") {
-    var data = winter_12_13
+  // Add event listener to handle selection change
+  dropdown.addEventListener('change', handleDropdownChange);
+
+
+  // Event handler function for dropdown change
+  function handleDropdownChange(event) {
+  let selectedVariableName = event.target.value;
+
+  // Find the dataset in winterData based on the selected variableName
+  let selectedDataset = winterData.find(item => item.variableName === selectedVariableName);
+
+  // Check if a dataset is found
+  if (selectedDataset) {
+      // Access the desired dataset properties
+      let year = selectedDataset.year;
+      let winterNumber = selectedDataset.winterNumber
+      selectedWinter = selectedDataset.variableName;
+
+      // Use the selected dataset for further processing
+      console.log('variableName:', selectedWinter);
+      console.log('Year:', year);
+      console.log('Winter Number:', winterNumber);
+
+      //Plug into ATRdata 
+      //ATRdata(window[selectedWinter]);
+
+      candleStick(window[selectedWinter])
+      ATRLine(window[selectedWinter])
+
+  } else {
+      console.log('Dataset not found for the selected variableName.');
   }
+  
 
-  // clears previous graph
-  d3.select("#container").html("")
+  }
+};  
 
-  console.log(data)
-
-  candleStick(data)
-}
 
 setTimeout(function () {
-  init()
 
-  // breaks when run with commented out code above
-  // not able to read in dataset properly in updatePlot function
-  //d3.selectAll("#year").on("change", updatePlot());
+  d3.selectAll("#year-dropdown").on("change", updatePlot());
+
+  init();
+
+  
+  
 }, 5000)
