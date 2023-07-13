@@ -74,7 +74,7 @@ setTimeout(function() {
 
     // map ATR data to variable
     let data = dataset.map(function(row){
-        return [new Date(row.Date).toISOString() , row.ATR]
+        return [new Date(row.Date).getTime() , row.ATR]
     })
 
     console.log("Here's the mapped data :", data)
@@ -99,6 +99,10 @@ setTimeout(function() {
         },
 
         xAxis: {
+            type: 'datetime',
+            labels: {
+              format: '{value:%e-%b}'
+            },
             accessibility: {
                 rangeDescription: 'Date'
             }
@@ -125,7 +129,7 @@ setTimeout(function() {
             dataGrouping: {
                 units: [
                     [
-                        'day', // unit name
+                        'week', // unit name
                         [1] // allowed multiples
                     ], 
                 ]

@@ -16,10 +16,12 @@
   <select id="city-dropdown"></select>
 
   <!-- Placeholder divs for the charts -->
-  <div id="container"></div>
-  <div id="priceChart"></div>
-  <div id="temperatureChart"></div>
-  <div id="chart"></div>
+  <div class="col-md-5">
+    <div id="priceChart"></div>
+  </div>
+  <div class="col-md-5">
+    <div id="ATRchart"></div>
+  </div>
 
 
     <!--d3, plotly, leaflet-->
@@ -30,13 +32,18 @@
     crossorigin=""></script>
     <!--these calls are for our javascript (logic) and for Highcharts-->
     <!--<script src="static/logic.js"></script>-->
-    <script src="static/logic-ali.js"></script>
+    <!--<script src="static/logic-ali.js"></script>-->
     <script src="static/logic-ed.js"></script>
     <!--<script src="static/logic-hannah.js"></script>-->    
-    <script src="https://code.highcharts.com/highcharts.js"></script> 
+    <!--<script src="https://code.highcharts.com/highcharts.js"></script> 
     <script src="http://code.highcharts.com/stock/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/data.js"></script> 
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script> 
+    <script src="https://code.highcharts.com/modules/data.js"></script> -->
     
+    
+    <!--for candlestick chart-->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <!--<script src="https://code.highcharts.com/stock/modules/exporting.js"></script> -->
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+
 </body>
 </html>

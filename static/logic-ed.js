@@ -56,6 +56,92 @@ winterData.forEach(({ year, variableName, winterNumber }) => {
 // function to initialize webpage with 2011-2012 price data
 function init() {
   candleStick(winter_11_12)
+  ATRLine(winter_11_12)
+}
+
+function ATRLine (dataset) {
+  let data = dataset.map(function(row){
+    return [new Date(row.Date).getTime() , row.ATR]
+})
+
+  console.log("Here's the mapped data :", data)
+
+  // chart ATR data
+  Highcharts.chart('ATRchart', {
+
+      title: {
+          text: '5 Day Average True Range (ATR) of Natural Gas Futures',
+          align: 'center'
+      },
+
+      subtitle: {
+          text: '',
+          align: 'left'
+      },
+
+      yAxis: {
+          title: {
+              text: 'ATR'
+          },
+          lineWidth: 1
+      },
+
+      xAxis: {
+          type: 'datetime',
+          labels: {
+            format: '{value:%e-%b}'
+          },
+          accessibility: {
+              rangeDescription: 'Date'
+          }
+      },
+
+      legend: {
+          enabled: false,
+          //layout: 'vertical',
+          //align: 'right'
+          //verticalAlign: 'middle'
+      },
+
+      plotOptions: {
+          series: {
+              label: {
+                  connectorAllowed: false
+              },
+              pointStart: 2011
+          }
+      },
+
+      series: [{
+          name: 'Natural Gas Futures ATR',
+          data: data,
+          dataGrouping: {
+              units: [
+                  [
+                      'day', // unit name
+                      [1] // allowed multiples
+                  ], 
+              ]
+          }
+      }],
+
+      responsive: {
+          rules: [{
+              condition: {
+                  maxWidth: 500
+              },
+              chartOptions: {
+                  legend: {
+                      layout: 'horizontal',
+                      align: 'center',
+                      verticalAlign: 'bottom'
+                  }
+              }
+          }]
+      }
+
+  });
+
 }
 
 function candleStick(dataset) {
@@ -70,19 +156,28 @@ function candleStick(dataset) {
       row.Low,
       row.Adj_Close,
     ]
-  })
+  });
 
   console.log("Here's the mapped data :", data)
 
   // create candlestick plot
-  Highcharts.stockChart("container", {
+  Highcharts.stockChart("priceChart", {
     // turn off zoom function
     rangeSelector: {
       enabled: false,
     },
 
+    yAxis: {
+      lineWidth: 1,
+      opposite: false,
+
+      title: {
+          text: 'Price'
+      }
+  },
+
     title: {
-      text: "Natural Gas Futures (ticker: NG=F)",
+      text: "Henry Hub Natural Gas Futures Price per 1 Million British Thermal Units (ticker: NG=F)",
     },
 
     series: [
@@ -99,9 +194,10 @@ function candleStick(dataset) {
           ],
         },
       },
-    ],
-  })
-}
+    ]
+  });
+};
+
 
 // update plot based on year selected in dropdown
 // not working properly
