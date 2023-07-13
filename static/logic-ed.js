@@ -201,6 +201,7 @@ function candleStick(dataset) {
 
 // update plot based on year selected in dropdown
 // not working properly
+////////////////////////////////////////////////////////////////////////////////////////////////
 function updatePlot() {
   let selectedWinter;
 
@@ -245,12 +246,17 @@ function updatePlot() {
 };  
 
 
+
+
 setTimeout(function () {
 
-  d3.selectAll("#year-dropdown").on("change", updatePlot());
 
-  init();
+d3.selectAll("#year-dropdown").on("change", updatePlot());
+init();
+
+
+  
 
   
   
-}, 5000)
+}, 1000)
