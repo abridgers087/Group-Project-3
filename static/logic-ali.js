@@ -41,16 +41,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const cityURL = `http://127.0.0.1:5000/weather_data/${city}/${year}`
 
+    // Determine the start and end dates for the winter season
+    const startDate = new Date(`${year - 1}-12-01`)
+    const utcStartDate = Date.UTC(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      startDate.getUTCDate()
+    )
+    const endDate = new Date(year, 2, 0) // Set the end date to the last day of February
+
     // Use fetch to load the city data
     fetch(cityURL)
       .then((response) => response.json())
       .then(function (cityData) {
         console.log("Received data for city:", city, "data:", cityData)
+        console.log(cityData)
 
         // Filter data for the selected year
         const filteredData = cityData.filter((record) => {
-          const recordYear = new Date(record.date).getFullYear()
-          return recordYear === year
+          const recordDate = new Date(record.date)
+          return recordDate >= startDate && recordDate <= endDate
         })
 
         const ranges = filteredData.map((record) => [
@@ -60,18 +70,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const averages = filteredData.map((record) => record.tavg)
 
-        // Determine the start and end dates for the winter season
-        const startDate = new Date(`${year - 1}-12-01`)
-        const endDate = new Date(year, 2, 0) // Set the end date to the last day of February
-
         // Calculate the number of days in the winter season
         const numberOfDays = Math.round(
           (endDate - startDate) / (24 * 60 * 60 * 1000)
         )
-        console.log("Number o days: ", numberOfDays)
+        console.log("Number of days: ", numberOfDays)
         console.log("Start Date:", startDate.toDateString())
         console.log("End Date:", endDate.toDateString())
         console.log("Number of Days:", numberOfDays)
+        console.log("Ranges:", ranges)
+        console.log("Averages", averages)
 
         // Load the necessary Highcharts modules
         Highcharts.chartLoadCallback = function () {
@@ -85,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
               accessibility: {
                 rangeDescription: `Range: ${startDate.toDateString()} to ${endDate.toDateString()}`,
               },
-              min: startDate.getTime(), // Set the minimum value of the x-axis to the start date
+              min: utcStartDate, // Set the minimum value of the x-axis to the start date
               max: endDate.getTime(), // Set the maximum value of the x-axis to the end date
               tickInterval: 30 * 24 * 60 * 60 * 1000, // Display ticks at monthly intervals
               labels: {
@@ -96,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
               title: {
                 text: "Temperature (°F)",
               },
-              min: null, // Remove the issue with negative temps
+              min: null,
             },
             tooltip: {
               crosshairs: true,
@@ -106,8 +114,9 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             plotOptions: {
               series: {
-                pointStart: startDate.getTime(),
-                pointEnd: endDate.getTime(), //+ numberOfDays * (24 * 60 * 60 * 1000),
+                pointStart: utcStartDate,
+                pointEnd:
+                  endDate.getTime() + numberOfDays * (24 * 60 * 60 * 1000),
                 pointIntervalUnit: "day",
                 states: {
                   hover: {
@@ -154,16 +163,18 @@ document.addEventListener("DOMContentLoaded", function () {
       })
   }
 
-  // Update the chart with default year and city
+  // Update the chart when the year or city is changed
+  yearDropdown.addEventListener("change", function () {
+    const year = parseInt(this.value)
+    const city = cityDropdown.value
+    updateChart(year, city)
+  })
+  cityDropdown.addEventListener("change", function () {
+    const year = parseInt(yearDropdown.value)
+    const city = this.value
+    updateChart(year, city)
+  })
+
+  // Update the chart with the default year and city
   updateChart(defaultYear, defaultCity)
-
-  // Event listener for dropdown change
-  function handleDropdownChange() {
-    const selectedYear = parseInt(yearDropdown.value)
-    const selectedCity = cityDropdown.value
-    updateChart(selectedYear, selectedCity)
-  }
-
-  yearDropdown.addEventListener("change", handleDropdownChange)
-  cityDropdown.addEventListener("change", handleDropdownChange)
 })
