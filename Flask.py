@@ -18,8 +18,8 @@ def welcome():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
-        f"/weather_data/(city name)<br/>"
-        f"/futures_data<br/>"        
+        f"/weather_data/<city>/<int:year>"
+        f"/futures_data/Winter<int:winter_number>"        
     )
 
 from datetime import datetime
