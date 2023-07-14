@@ -21,6 +21,12 @@
 //     d3.select("#city").append("option").attr("value", city).text(city)
 //   })
 
+
+let promises = [];
+
+
+
+
 ///// FUTURES DATA /////
 const winterData = [
   { year: "2011-2012", variableName: "winter_11_12", winterNumber: 1 },
@@ -36,10 +42,10 @@ const winterData = [
 
 winterData.forEach(({ year, variableName, winterNumber }) => {
   const url = `http://127.0.0.1:5000/futures_data/Winter${winterNumber}`
-  d3.json(url).then(function (data) {
+  promises.push(d3.json(url).then(function (data) {
     //console.log(`Winter ${year}: `, data)
     window[variableName] = data
-  })
+  }))
   // Append the city as an option to the select element
   d3.select("#year-dropdown").append("option").attr("value", variableName).text(year)
 })
@@ -248,15 +254,19 @@ function updatePlot() {
 
 
 
-setTimeout(function () {
+//setTimeout(function () {
 
-
-d3.selectAll("#year-dropdown").on("change", updatePlot());
+Promise.all(promises).then(function () {
+  d3.selectAll("#year-dropdown").on("change", updatePlot());
 init();
+}) 
+
+//d3.selectAll("#year-dropdown").on("change", updatePlot());
+//init();
 
 
   
 
   
   
-}, 1000)
+//}, 1000)
