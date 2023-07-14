@@ -25,8 +25,6 @@
 let promises = [];
 
 
-
-
 ///// FUTURES DATA /////
 const winterData = [
   { year: "2011-2012", variableName: "winter_11_12", winterNumber: 1 },
@@ -63,7 +61,78 @@ winterData.forEach(({ year, variableName, winterNumber }) => {
 function init() {
   candleStick(winter_11_12)
   ATRLine(winter_11_12)
+  synch()
 }
+
+function synch() {
+ // * In order to synchronize tooltips and crosshairs, override the
+ // * built-in events with handlers defined on the parent element.
+  //*/
+ ['mousemove', 'touchmove', 'touchstart'].forEach(function (eventType) {
+     document.getElementById('col-md-5').addEventListener(
+         eventType,
+         function (e) {
+             let chart,
+                 point,
+                 i,
+                 event;
+ 
+             for (i = 0; i < Highcharts.charts.length; i = i + 1) {
+                 chart = Highcharts.charts[i];
+                 // Find coordinates within the chart
+                 event = chart.pointer.normalize(e);                              //throwing error in console upon selecting year dataset
+                 // Get the hovered point
+                 point = chart.series[0].searchPoint(event, true);
+ 
+                 if (point) {
+                     point.highlight(e);
+                 }
+             }
+         }
+     );
+ });
+ 
+  /**
+    * Override the reset function, we don't need to hide the tooltips and
+    * crosshairs.
+    */
+  Highcharts.Pointer.prototype.reset = function () {
+      return undefined;
+  };
+  
+  /**
+    * Highlight a point by showing tooltip, setting hover state and draw crosshair
+    */
+  Highcharts.Point.prototype.highlight = function (event) {
+      event = this.series.chart.pointer.normalize(event);
+      this.onMouseOver(); // Show the hover marker
+      this.series.chart.tooltip.refresh(this); // Show the tooltip
+      this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
+  };
+  
+  /**
+    * Synchronize zooming through the setExtremes event handler.
+    */
+  function syncExtremes(e) {
+      const thisChart = this.chart;
+  
+      if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
+          Highcharts.each(Highcharts.charts, function (chart) {
+              if (chart !== thisChart) {
+                  if (chart.xAxis[0].setExtremes) { // It is null while updating
+                      chart.xAxis[0].setExtremes(
+                          e.min,
+                          e.max,
+                          undefined,
+                          false,
+                          { trigger: 'syncExtremes' }
+                      );
+                  }
+              }
+          });
+      }
+  };
+  };
 
 function ATRLine (dataset) {
   let data = dataset.map(function(row){
@@ -99,7 +168,8 @@ function ATRLine (dataset) {
           },
           accessibility: {
               rangeDescription: 'Date'
-          }
+          },
+          min: data[0][0]                         /////////////////////////////////////////////// testing min xaxis value
       },
 
       legend: {
@@ -124,7 +194,7 @@ function ATRLine (dataset) {
           dataGrouping: {
               units: [
                   [
-                      'week', // unit name
+                      'day', // unit name
                       [1] // allowed multiples
                   ], 
               ]
@@ -173,14 +243,19 @@ function candleStick(dataset) {
       enabled: false,
     },
 
+    xAxis:{
+      min: data[0][0],
+      tickInterval: 24 * 3600 * 1000           ///////////////////////////////////////////////////////////////////// testing min xaxis value
+    },
+
     yAxis: {
-      lineWidth: 1,
+      lineWidth: 1,           
       opposite: false,
 
       title: {
           text: 'Price'
       }
-  },
+    },
 
     title: {
       text: "Henry Hub Natural Gas Futures Price per 1 Million British Thermal Units (ticker: NG=F)",
@@ -194,7 +269,7 @@ function candleStick(dataset) {
         dataGrouping: {
           units: [
             [
-              "week", // unit name
+              "day", // unit name
               [1], // allowed multiples
             ],
           ],
@@ -240,8 +315,9 @@ function updatePlot() {
       //Plug into ATRdata 
       //ATRdata(window[selectedWinter]);
 
-      candleStick(window[selectedWinter])
-      ATRLine(window[selectedWinter])
+      candleStick(window[selectedWinter]);
+      ATRLine(window[selectedWinter]);
+      synch();
 
   } else {
       console.log('Dataset not found for the selected variableName.');
@@ -253,20 +329,15 @@ function updatePlot() {
 
 
 
-
-//setTimeout(function () {
-
 Promise.all(promises).then(function () {
-  d3.selectAll("#year-dropdown").on("change", updatePlot());
-init();
-}) 
+  d3.selectAll("#year-dropdown").on("change", updatePlot(),);
+  init();
+}); 
 
-//d3.selectAll("#year-dropdown").on("change", updatePlot());
-//init();
 
 
   
 
   
   
-//}, 1000)
+
