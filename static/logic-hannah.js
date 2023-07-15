@@ -21,9 +21,7 @@
 //     d3.select("#city").append("option").attr("value", city).text(city)
 //   })
 
-
-let promises = [];
-
+let promises = []
 
 ///// FUTURES DATA /////
 const winterData = [
@@ -40,12 +38,17 @@ const winterData = [
 
 winterData.forEach(({ year, variableName, winterNumber }) => {
   const url = `http://127.0.0.1:5000/futures_data/Winter${winterNumber}`
-  promises.push(d3.json(url).then(function (data) {
-    //console.log(`Winter ${year}: `, data)
-    window[variableName] = data
-  }))
+  promises.push(
+    d3.json(url).then(function (data) {
+      //console.log(`Winter ${year}: `, data)
+      window[variableName] = data
+    })
+  )
   // Append the city as an option to the select element
-  d3.select("#year-dropdown").append("option").attr("value", variableName).text(year)
+  d3.select("#year-dropdown")
+    .append("option")
+    .attr("value", variableName)
+    .text(year)
 })
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -65,159 +68,154 @@ function init() {
 }
 
 function synch() {
- // * In order to synchronize tooltips and crosshairs, override the
- // * built-in events with handlers defined on the parent element.
+  // * In order to synchronize tooltips and crosshairs, override the
+  // * built-in events with handlers defined on the parent element.
   //*/
- ['mousemove', 'touchmove', 'touchstart'].forEach(function (eventType) {
-     document.getElementById('col-md-5').addEventListener(
-         eventType,
-         function (e) {
-             let chart,
-                 point,
-                 i,
-                 event;
- 
-             for (i = 0; i < Highcharts.charts.length; i = i + 1) {
-                 chart = Highcharts.charts[i];
-                 // Find coordinates within the chart
-                 event = chart.pointer.normalize(e);                              //throwing error in console upon selecting year dataset
-                 // Get the hovered point
-                 point = chart.series[0].searchPoint(event, true);
- 
-                 if (point) {
-                     point.highlight(e);
-                 }
-             }
-         }
-     );
- });
- 
-  /**
-    * Override the reset function, we don't need to hide the tooltips and
-    * crosshairs.
-    */
-  Highcharts.Pointer.prototype.reset = function () {
-      return undefined;
-  };
-  
-  /**
-    * Highlight a point by showing tooltip, setting hover state and draw crosshair
-    */
-  Highcharts.Point.prototype.highlight = function (event) {
-      event = this.series.chart.pointer.normalize(event);
-      this.onMouseOver(); // Show the hover marker
-      this.series.chart.tooltip.refresh(this); // Show the tooltip
-      this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
-  };
-  
-  /**
-    * Synchronize zooming through the setExtremes event handler.
-    */
-  function syncExtremes(e) {
-      const thisChart = this.chart;
-  
-      if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
-          Highcharts.each(Highcharts.charts, function (chart) {
-              if (chart !== thisChart) {
-                  if (chart.xAxis[0].setExtremes) { // It is null while updating
-                      chart.xAxis[0].setExtremes(
-                          e.min,
-                          e.max,
-                          undefined,
-                          false,
-                          { trigger: 'syncExtremes' }
-                      );
-                  }
-              }
-          });
-      }
-  };
-  };
+  ;["mousemove", "touchmove", "touchstart"].forEach(function (eventType) {
+    document
+      .getElementById("col-md-5")
+      .addEventListener(eventType, function (e) {
+        let chart, point, i, event
 
-function ATRLine (dataset) {
-  let data = dataset.map(function(row){
-    return [new Date(row.Date).getTime() , row.ATR]
-})
+        for (i = 0; i < Highcharts.charts.length; i = i + 1) {
+          chart = Highcharts.charts[i]
+          // Find coordinates within the chart
+          event = chart.pointer.normalize(e) //throwing error in console upon selecting year dataset
+          // Get the hovered point
+          point = chart.series[0].searchPoint(event, true)
+
+          if (point) {
+            point.highlight(e)
+          }
+        }
+      })
+  })
+
+  /**
+   * Override the reset function, we don't need to hide the tooltips and
+   * crosshairs.
+   */
+  Highcharts.Pointer.prototype.reset = function () {
+    return undefined
+  }
+
+  /**
+   * Highlight a point by showing tooltip, setting hover state and draw crosshair
+   */
+  Highcharts.Point.prototype.highlight = function (event) {
+    event = this.series.chart.pointer.normalize(event)
+    this.onMouseOver() // Show the hover marker
+    this.series.chart.tooltip.refresh(this) // Show the tooltip
+    this.series.chart.xAxis[0].drawCrosshair(event, this) // Show the crosshair
+  }
+
+  /**
+   * Synchronize zooming through the setExtremes event handler.
+   */
+  function syncExtremes(e) {
+    const thisChart = this.chart
+
+    if (e.trigger !== "syncExtremes") {
+      // Prevent feedback loop
+      Highcharts.each(Highcharts.charts, function (chart) {
+        if (chart !== thisChart) {
+          if (chart.xAxis[0].setExtremes) {
+            // It is null while updating
+            chart.xAxis[0].setExtremes(e.min, e.max, undefined, false, {
+              trigger: "syncExtremes",
+            })
+          }
+        }
+      })
+    }
+  }
+}
+
+function ATRLine(dataset) {
+  let data = dataset.map(function (row) {
+    return [new Date(row.Date).getTime(), row.ATR]
+  })
 
   console.log("Here's the mapped data :", data)
 
   // chart ATR data
-  Highcharts.chart('ATRchart', {
+  Highcharts.chart("ATRchart", {
+    title: {
+      text: "5 Day Average True Range (ATR) of Natural Gas Futures",
+      align: "center",
+    },
 
+    subtitle: {
+      text: "",
+      align: "left",
+    },
+
+    yAxis: {
       title: {
-          text: '5 Day Average True Range (ATR) of Natural Gas Futures',
-          align: 'center'
+        text: "ATR",
       },
+      lineWidth: 1,
+    },
 
-      subtitle: {
-          text: '',
-          align: 'left'
+    xAxis: {
+      type: "datetime",
+      labels: {
+        format: "{value:%e-%b}",
       },
+      events: {
+        setExtremes: syncExtremes, // Call syncExtremes function on setExtremes event
+      },
+      min: data[0][0], // Set the min value of the xAxis to the first timestamp
+    },
 
-      yAxis: {
-          title: {
-              text: 'ATR'
+    legend: {
+      enabled: false,
+      //layout: 'vertical',
+      //align: 'right'
+      //verticalAlign: 'middle'
+    },
+
+    plotOptions: {
+      series: {
+        label: {
+          connectorAllowed: false,
+        },
+        pointStart: 2011,
+      },
+    },
+
+    series: [
+      {
+        name: "Natural Gas Futures ATR",
+        data: data,
+        dataGrouping: {
+          units: [
+            [
+              "day", // unit name
+              [1], // allowed multiples
+            ],
+          ],
+        },
+      },
+    ],
+
+    responsive: {
+      rules: [
+        {
+          condition: {
+            maxWidth: 500,
           },
-          lineWidth: 1
-      },
-
-      xAxis: {
-        type: 'datetime',
-        labels: {
-          format: '{value:%e-%b}'
+          chartOptions: {
+            legend: {
+              layout: "horizontal",
+              align: "center",
+              verticalAlign: "bottom",
+            },
+          },
         },
-        events: {
-          setExtremes: syncExtremes // Call syncExtremes function on setExtremes event
-        },
-        min: data[0][0] // Set the min value of the xAxis to the first timestamp
-      },
-
-      legend: {
-          enabled: false,
-          //layout: 'vertical',
-          //align: 'right'
-          //verticalAlign: 'middle'
-      },
-
-      plotOptions: {
-          series: {
-              label: {
-                  connectorAllowed: false
-              },
-              pointStart: 2011
-          }
-      },
-
-      series: [{
-          name: 'Natural Gas Futures ATR',
-          data: data,
-          dataGrouping: {
-              units: [
-                  [
-                      'day', // unit name
-                      [1] // allowed multiples
-                  ], 
-              ]
-          }
-      }],
-
-      responsive: {
-          rules: [{
-              condition: {
-                  maxWidth: 500
-              },
-              chartOptions: {
-                  legend: {
-                      layout: 'horizontal',
-                      align: 'center',
-                      verticalAlign: 'bottom'
-                  }
-              }
-          }]
-      }
-
-  });
-
+      ],
+    },
+  })
 }
 
 function candleStick(dataset) {
@@ -232,7 +230,7 @@ function candleStick(dataset) {
       row.Low,
       row.Adj_Close,
     ]
-  });
+  })
 
   console.log("Here's the mapped data :", data)
 
@@ -243,22 +241,21 @@ function candleStick(dataset) {
       enabled: false,
     },
 
-    xAxis:{
-        type: 'datetime',
-        events: {
-          setExtremes: syncExtremes // Call syncExtremes function on setExtremes event
-        },
-        min: data[0][0] // Set the min value of the xAxis to the first timestamp
+    xAxis: {
+      type: "datetime",
+      events: {
+        setExtremes: syncExtremes, // Call syncExtremes function on setExtremes event
       },
-  
+      min: data[0][0], // Set the min value of the xAxis to the first timestamp
+    },
 
     yAxis: {
-      lineWidth: 1,           
+      lineWidth: 1,
       opposite: false,
 
       title: {
-          text: 'Price'
-      }
+        text: "Price",
+      },
     },
 
     title: {
@@ -279,83 +276,75 @@ function candleStick(dataset) {
           ],
         },
       },
-    ]
-  });
-};
-
+    ],
+  })
+}
 
 // update plot based on year selected in dropdown
 // not working properly
 ////////////////////////////////////////////////////////////////////////////////////////////////
 function updatePlot() {
-  let selectedWinter;
+  let selectedWinter
 
   // Get the dropdown element
-  let dropdown = document.getElementById('year-dropdown');
+  let dropdown = document.getElementById("year-dropdown")
 
   // Add event listener to handle selection change
-  dropdown.addEventListener('change', handleDropdownChange);
-
+  dropdown.addEventListener("change", handleDropdownChange)
 
   // Event handler function for dropdown change
   function handleDropdownChange(event) {
-  let selectedVariableName = event.target.value;
+    let selectedVariableName = event.target.value
 
-  // Find the dataset in winterData based on the selected variableName
-  let selectedDataset = winterData.find(item => item.variableName === selectedVariableName);
+    // Find the dataset in winterData based on the selected variableName
+    let selectedDataset = winterData.find(
+      (item) => item.variableName === selectedVariableName
+    )
 
-  // Check if a dataset is found
-  if (selectedDataset) {
+    // Check if a dataset is found
+    if (selectedDataset) {
       // Access the desired dataset properties
-      let year = selectedDataset.year;
+      let year = selectedDataset.year
       let winterNumber = selectedDataset.winterNumber
-      selectedWinter = selectedDataset.variableName;
+      selectedWinter = selectedDataset.variableName
 
       // Use the selected dataset for further processing
-      console.log('variableName:', selectedWinter);
-      console.log('Year:', year);
-      console.log('Winter Number:', winterNumber);
+      console.log("variableName:", selectedWinter)
+      console.log("Year:", year)
+      console.log("Winter Number:", winterNumber)
 
-      //Plug into ATRdata 
+      //Plug into ATRdata
       //ATRdata(window[selectedWinter]);
 
-      candleStick(window[selectedWinter]);
-      ATRLine(window[selectedWinter]);
-      synch();
-
-  } else {
-      console.log('Dataset not found for the selected variableName.');
+      candleStick(window[selectedWinter])
+      ATRLine(window[selectedWinter])
+      synch()
+    } else {
+      console.log("Dataset not found for the selected variableName.")
+    }
   }
-  
-
-  }
-};  
+}
 
 // Synchronize the extremes of the xAxis
 function syncExtremes(e) {
-    let chart = this.chart;
-  
-    if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
-      // Loop through each chart and set the extremes
-      Highcharts.each(Highcharts.charts, function(ch) {
-        if (ch !== chart) {
-          if (ch.xAxis[0].setExtremes) {
-            ch.xAxis[0].setExtremes(e.min, e.max, undefined, false, { trigger: 'syncExtremes' });
-          }
+  let chart = this.chart
+
+  if (e.trigger !== "syncExtremes") {
+    // Prevent feedback loop
+    // Loop through each chart and set the extremes
+    Highcharts.each(Highcharts.charts, function (ch) {
+      if (ch !== chart) {
+        if (ch.xAxis[0].setExtremes) {
+          ch.xAxis[0].setExtremes(e.min, e.max, undefined, false, {
+            trigger: "syncExtremes",
+          })
         }
-      });
-    }
+      }
+    })
   }
+}
 
 Promise.all(promises).then(function () {
-  d3.selectAll("#year-dropdown").on("change", updatePlot(),);
-  init();
-}); 
-
-
-
-  
-
-  
-  
-
+  d3.selectAll("#year-dropdown").on("change", updatePlot())
+  init()
+})

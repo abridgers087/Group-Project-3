@@ -1,0 +1,37 @@
+body {
+    background-color: #FFF;
+}
+
+h1, h3 {
+    text-align: center;
+}
+
+#futuresChartContainer {
+    float:left;
+    padding-left:50px;
+    max-width:1500px;
+    width: 45%
+}
+
+#weatherChartContainer {
+ float:right;
+ padding-right: 50px;
+ max-width:1500px;
+ width: 45%;
+}
+
+#weatherChartContainer h1 {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1.2em;
+    color: rgb(51, 51, 51);
+    font-weight: bold;
+    fill: rgb(51, 51, 51);
+}
+
+.menu-selector {
+    text-align: center;
+    padding: 20px;
+    font-weight:bold;
+    color: blue
+}
+

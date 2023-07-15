@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Create the year dropdown menu
   const yearDropdown = document.getElementById("year-dropdown")
   const startYear = 2011
-  const endYear = 2020
+  const endYear = 2019
   for (let year = startYear; year <= endYear; year++) {
     const option = document.createElement("option")
     option.text = year
@@ -42,13 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const cityURL = `http://127.0.0.1:5000/weather_data/${city}/${year}`
 
     // Determine the start and end dates for the winter season
-    const startDate = new Date(`${year - 1}-12-01`)
+    const startDate = new Date(`${year}-12-01`)
     const utcStartDate = Date.UTC(
       startDate.getUTCFullYear(),
       startDate.getUTCMonth(),
       startDate.getUTCDate()
     )
-    const endDate = new Date(year, 2, 0) // Set the end date to the last day of February
+    const endDate = new Date(year + 1, 2, 0) // Set the end date to the last day of February
 
     // Use fetch to load the city data
     fetch(cityURL)

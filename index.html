@@ -1,56 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-      <!-- Include the Plotly.js library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/styles.css" />
     <title>Document</title>
 </head>
 <body>
-    <!-- Year and City selection drop-down boxes -->
-  <label for="year-dropdown">Select Year:</label>
-  <select id="year-dropdown"></select>
-
-
-
+    <h1>Henry Hub Natural Gas Prices and Recorded Temperatures</h1>
+    <h3>by Ali Bridgers, Ed Shanks and Hannah Weber</h3>
+  <div id="chart-container">
   <!-- Placeholder divs for the charts -->
-  <div id="col-md-5">                              <!--was originally <div class="col-md-5">-->
-    <div id="priceChart"></div>
+  <div id="futuresChartContainer">         
+    <div class="menu-selector">
+      <label for="year-dropdown">Change year:</label>
+      <select id="year-dropdown"></select>
+    </div>
+    <div class="chart" id="priceChart"></div>                             
+    <div class="chart" id="ATRchart"></div>
   </div>
-  <div id="col-md-5">                              <!--was originally <div class="col-md-5">-->
-    <div id="ATRchart"></div>
+  <div id="weatherChartContainer">
+    <!--city dropdown-->
+    <div class="menu-selector">
+      <label for="city-dropdown">Change city:</label>
+      <select id="city-dropdown"></select>
+    </div>
+    <h1 class="highcharts-title">Daily Temperature data for: <span id="city-label"></span></h1>
+    <!--temperature chart-->
+    <div class="chart" id="temperatureChart"></div>
+
   </div>
-
-  <!--city dropdown-->
-  <label for="city-dropdown">Select City:</label>
-  <select id="city-dropdown"></select>
-
-  <!--temperature chart-->
-  <div class="col-md-6">
-    <div id="temperatureChart"></div>
-  </div>
-
-    <!--d3, plotly, leaflet-->
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
-    <!--these calls are for our javascript (logic) and for Highcharts-->
-    <!--<script src="static/logic.js"></script>-->
-    <!--<script src="static/logic-ali.js"></script>-->
-    <!--<script src="static/logic-ed.js"></script>-->  
-    <script src="static/logic-hannah.js"></script>  
-    <!--<script src="https://code.highcharts.com/highcharts.js"></script> 
-    <script src="http://code.highcharts.com/stock/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/data.js"></script> -->
-    
-    
-    <!--for candlestick chart-->
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <!--<script src="https://code.highcharts.com/stock/modules/exporting.js"></script> -->
-    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+</div>
+<!--these calls are for our javascript (logic) and for Highcharts-->
+<script src="static/logic.js"></script>
+<!--<script src="static/logic-ali.js"></script>-->
+<!--<script src="static/logic-ed.js"></script>-->  
+<!-- <script src="static/logic-hannah.js"></script>   -->
+<!--for candlestick chart-->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="http://code.highcharts.com/stock/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
 
 </body>
 </html>

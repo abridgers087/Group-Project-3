@@ -1,225 +1,389 @@
-///// CITY DATA /////
+let weatherChart, atrChart, candlestickChart
 
-const cities = [
-  "Los Angeles",
-  "New York City",
-  "Chicago",
-  "Detroit",
-  "Columbus",
-  "Philadelphia",
-  "Newark",
-  "Houston",
-  "Indianapolis",
-  "Milwaukee",
-]
-const baseUrl = "http://127.0.0.1:5000/weather_data/"
-cities.forEach((city) => {
-  const url = baseUrl + encodeURIComponent(city)
-  d3.json(url).then((data) => {
-    console.log(`${city} weather: `, data)
-    window[city.replace(" ", "")] = data
-  })
-  // Append the city as an option to the select element
-  d3.select("#city").append("option").attr("value", city).text(city)
-})
-
-///// FUTURES DATA /////
-const winterData = [
-  { year: "2011-2012", variableName: "winter_11_12", winterNumber: 1 },
-  { year: "2012-2013", variableName: "winter_12_13", winterNumber: 2 },
-  { year: "2013-2014", variableName: "winter_13_14", winterNumber: 3 },
-  { year: "2014-2015", variableName: "winter_14_15", winterNumber: 4 },
-  { year: "2015-2016", variableName: "winter_15_16", winterNumber: 5 },
-  { year: "2016-2017", variableName: "winter_16_17", winterNumber: 6 },
-  { year: "2017-2018", variableName: "winter_17_18", winterNumber: 7 },
-  { year: "2018-2019", variableName: "winter_18_19", winterNumber: 8 },
-  { year: "2019-2020", variableName: "winter_19_20", winterNumber: 9 },
-]
-winterData.forEach(({ year, variableName, winterNumber }) => {
-  const url = `http://127.0.0.1:5000/futures_data/Winter${winterNumber}`
-  d3.json(url).then(function (data) {
-    console.log(`Winter ${year}: `, data)
-    window[variableName] = data
-  })
-  // Append the city as an option to the select element
-  d3.select("#year").append("option").attr("value", year).text(year)
-})
-
-///////////////////////////////////
-
-setTimeout(function() {
-  console.log('chicago log', Chicago);
-
-    /*
-  The purpose of this demo is to demonstrate how multiple charts on the same page
-  can be linked through DOM and Highcharts events and API methods. It takes a
-  standard Highcharts config with a small variation for each data set, and a
-  mouse/touch event handler to bind the charts together.
-  */
-
-
-  /**
-   * In order to synchronize tooltips and crosshairs, override the
-   * built-in events with handlers defined on the parent element.
-   */
-  ['mousemove', 'touchmove', 'touchstart'].forEach(function (eventType) {
-    document.getElementById('container').addEventListener(
-        eventType,
-        function (e) {
-            let chart,
-                point,
-                i,
-                event;
-
-            for (i = 0; i < Highcharts.charts.length; i = i + 1) {
-                chart = Highcharts.charts[i];
-                // Find coordinates within the chart
-                event = chart.pointer.normalize(e);
-                // Get the hovered point
-                point = chart.series[0].searchPoint(event, true);
-
-                if (point) {
-                    point.highlight(e);
-                }
-            }
-        }
-    );
-  });
-
-  /**
-  * Override the reset function, we don't need to hide the tooltips and
-  * crosshairs.
-  */
-  Highcharts.Pointer.prototype.reset = function () {
-    return undefined;
-  };
-
-  /**
-  * Highlight a point by showing tooltip, setting hover state and draw crosshair
-  */
-  Highcharts.Point.prototype.highlight = function (event) {
-    event = this.series.chart.pointer.normalize(event);
-    this.onMouseOver(); // Show the hover marker
-    this.series.chart.tooltip.refresh(this); // Show the tooltip
-    this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
-  };
-
-  /**
-  * Synchronize zooming through the setExtremes event handler.
-  */
-  function syncExtremes(e) {
-    const thisChart = this.chart;
-
-    if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
-        Highcharts.each(Highcharts.charts, function (chart) {
-            if (chart !== thisChart) {
-                if (chart.xAxis[0].setExtremes) { // It is null while updating
-                    chart.xAxis[0].setExtremes(
-                        e.min,
-                        e.max,
-                        undefined,
-                        false,
-                        { trigger: 'syncExtremes' }
-                    );
-                }
-            }
-        });
-    }
+// Load in initial data sets and build charts when dom is ready
+document.addEventListener("DOMContentLoaded", function () {
+  // Create the year dropdown menu
+  const yearDropdown = document.getElementById("year-dropdown")
+  const startYear = 2011
+  const endYear = 2019
+  for (let year = startYear; year <= endYear; year++) {
+    const option = document.createElement("option")
+    option.text = year
+    yearDropdown.add(option)
   }
 
-  // Get the data. The contents of the data file can be viewed at
-  Highcharts.ajax({
-    url: 'https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/activity.json',
-    dataType: 'text',
-    success: function (activity) {
+  //Set default year
+  const defaultYear = startYear
 
-        activity = JSON.parse(activity);
-        console.log(activity);
-        activity.datasets.forEach(function (dataset, i) {
+  // Create the city dropdown menu
+  const cityDropdown = document.getElementById("city-dropdown")
+  const cities = [
+    "Chicago",
+    "New York City",
+    "Los Angeles",
+    "Detroit",
+    "Columbus",
+    "Philadelphia",
+    "Newark",
+    "Houston",
+    "Indianapolis",
+    "Milwaukee",
+  ]
 
-            // Add X values
-            dataset.data = Highcharts.map(dataset.data, function (val, j) {
-                return [activity.xData[j], val];
-            });
+  cities.forEach((city) => {
+    const option = document.createElement("option")
+    option.text = city
+    cityDropdown.add(option)
+  })
 
-            const chartDiv = document.createElement('div');
-            chartDiv.className = 'chart';
-            document.getElementById('container').appendChild(chartDiv);
+  // Set default city
+  const defaultCity = cities[0] // Set the first city as default
+  document.getElementById("city-label").innerHTML = defaultCity
+  // Construct the weather chart
+  initWeatherChart(defaultYear, defaultCity)
+  initiateFuturesChart(defaultYear)
 
-            Highcharts.chart(chartDiv, {
-                chart: {
-                    marginLeft: 40, // Keep all charts left aligned
-                    spacingTop: 20,
-                    spacingBottom: 20
-                },
-                title: {
-                    text: dataset.name,
-                    align: 'left',
-                    margin: 0,
-                    x: 30
-                },
-                credits: {
-                    enabled: false
-                },
-                legend: {
-                    enabled: false
-                },
-                xAxis: {
-                    crosshair: true,
-                    events: {
-                        setExtremes: syncExtremes
-                    },
-                    labels: {
-                        format: '{value} km'
-                    },
-                    accessibility: {
-                        description: 'Kilometers',
-                        rangeDescription: '0km to 6.5km'
-                    }
-                },
-                yAxis: {
-                    title: {
-                        text: null
-                    }
-                },
-                tooltip: {
-                    positioner: function () {
-                        return {
-                            // right aligned
-                            x: this.chart.chartWidth - this.label.width,
-                            y: 10 // align to title
-                        };
-                    },
-                    borderWidth: 0,
-                    backgroundColor: 'none',
-                    pointFormat: '{point.y}',
-                    headerFormat: '',
-                    shadow: false,
-                    style: {
-                        fontSize: '18px'
-                    },
-                    valueDecimals: dataset.valueDecimals
-                },
-                series: [{
-                    data: dataset.data,
-                    name: dataset.name,
-                    type: dataset.type,
-                    color: Highcharts.getOptions().colors[i],
-                    fillOpacity: 0.3,
-                    tooltip: {
-                        valueSuffix: ' ' + dataset.unit
-                    }
-                }]
-            });
-        });
-    }
-  });
+  // Update the chart when the year or city is changed
+  yearDropdown.addEventListener("change", function () {
+    updateWeatherChart(yearDropdown.value, cityDropdown.value)
+    updateFuturesCharts(yearDropdown.value)
+  })
+  cityDropdown.addEventListener("change", function () {
+    updateWeatherChart(yearDropdown.value, cityDropdown.value)
+    document.getElementById("city-label").innerHTML = cityDropdown.value
+  })
+})
 
+// Configure and render futures Highcharts
+async function initiateFuturesChart(year) {
+  console.log("initiateFuturesChart")
+  const futuresData = await loadFuturesData(year)
 
+  const atrChartOptions = {
+    chart: {
+      renderTo: "ATRchart",
+    },
+    title: {
+      text: "5 Day Average True Range (ATR) of Natural Gas Futures",
+      align: "center",
+    },
 
+    subtitle: {
+      text: "",
+      align: "left",
+    },
+    yAxis: {
+      title: {
+        text: "ATR",
+      },
+      lineWidth: 1,
+    },
 
-}, 5000);
+    xAxis: {
+      type: "datetime",
+      labels: {
+        format: "{value:%e-%b}",
+      },
+      events: {
+        setExtremes: syncExtremes, // Call syncExtremes function on setExtremes event
+      },
 
+      min: futuresData.atr[0].date, // Set the min value of the xAxis to the first timestamp
+    },
 
-  
-  
+    legend: {
+      enabled: false,
+    },
+
+    plotOptions: {
+      series: {
+        label: {
+          connectorAllowed: false,
+        },
+        pointStart: 2011,
+      },
+    },
+    series: [
+      {
+        name: "Natural Gas Futures ATR",
+        data: futuresData.atr,
+        dataGrouping: {
+          units: [
+            [
+              "day", // unit name
+              [1], // allowed multiples
+            ],
+          ],
+        },
+      },
+    ],
+
+    responsive: {
+      rules: [
+        {
+          condition: {
+            maxWidth: 500,
+          },
+          chartOptions: {
+            legend: {
+              layout: "horizontal",
+              align: "center",
+              verticalAlign: "bottom",
+            },
+          },
+        },
+      ],
+    },
+  }
+
+  atrChart = new Highcharts.Chart(atrChartOptions)
+
+  const candleStickChartOptions = {
+    chart: {
+      renderTo: "priceChart",
+    },
+    rangeSelector: {
+      enabled: false,
+    },
+
+    xAxis: {
+      type: "datetime",
+      events: {
+        setExtremes: syncExtremes, // Call syncExtremes function on setExtremes event
+      },
+      min: futuresData.candlestick[0].date, // Set the min value of the xAxis to the first timestamp
+    },
+
+    yAxis: {
+      lineWidth: 1,
+      opposite: false,
+
+      title: {
+        text: "Price",
+      },
+    },
+
+    title: {
+      text: "Henry Hub Natural Gas Futures Price per 1 Million British Thermal Units (ticker: NG=F)",
+    },
+
+    series: [
+      {
+        type: "candlestick",
+        name: "Natural gas futures",
+        data: futuresData.candlestick,
+        dataGrouping: {
+          units: [
+            [
+              "day", // unit name
+              [1], // allowed multiples
+            ],
+          ],
+        },
+      },
+    ],
+  }
+
+  candlestickChart = new Highcharts.Chart(candleStickChartOptions)
+}
+
+// Conigure and render the weather chart loading in data with the default year and city
+async function initWeatherChart(year, city) {
+  // Retrieve data for initial chart load
+  weatherData = await loadWeatherData(year, city)
+  console.log(weatherData)
+  // Determine the start and end dates for the winter season
+  const chartStartDate = new Date(`${year}-12-01`)
+  const chartEndDate = new Date(year + 1, 2, 0) // Set the end date to the last day of February
+
+  const utcChartStartDate = Date.UTC(
+    chartStartDate.getUTCFullYear(),
+    chartStartDate.getUTCMonth(),
+    chartStartDate.getUTCDate()
+  )
+
+  const numberOfDays = Math.round(
+    (chartEndDate - chartStartDate) / (24 * 60 * 60 * 1000)
+  )
+
+  const weatherChartOptions = {
+    chart: {
+      renderTo: "temperatureChart",
+    },
+    title: {
+      text: "",
+      align: "center",
+    },
+    xAxis: {
+      type: "datetime",
+      accessibility: {
+        rangeDescription: `Range: ${chartStartDate.toDateString()} to ${chartEndDate.toDateString()}`,
+      },
+      events: {
+        setExtremes: syncExtremes, // Call syncExtremes function on setExtremes event
+      },
+
+      //   min: utcStartDate, // Set the minimum value of the x-axis to the start date
+      //   max: endDate.getTime(), // Set the maximum value of the x-axis to the end date
+      //   tickInterval: 30 * 24 * 60 * 60 * 1000, // Display ticks at monthly intervals
+      labels: {
+        format: "{value:%e-%b}", // Format tick labels as abbreviated month names
+      },
+    },
+    yAxis: {
+      title: {
+        text: "Temperature (°F)",
+      },
+      min: null,
+    },
+    tooltip: {
+      crosshairs: true,
+      shared: true,
+      valueSuffix: "°F",
+      valueDecimals: 2, // Set the number of decimal places for the temperature values
+    },
+    plotOptions: {
+      series: {
+        pointStart: utcChartStartDate,
+        pointEnd: chartEndDate.getTime() + numberOfDays * (24 * 60 * 60 * 1000),
+        pointIntervalUnit: "day",
+        states: {
+          hover: {
+            enabled: true,
+            halo: false, //disable halo effect
+          },
+        },
+        reversedStacks: false, //disable reversed stacks
+      },
+    },
+    series: [
+      {
+        name: "Temperature",
+        data: weatherData.averages,
+        zIndex: 1,
+        marker: {
+          fillColor: "white",
+          lineWidth: 2,
+          lineColor: Highcharts.getOptions().colors[0],
+        },
+      },
+      {
+        name: "Range",
+        data: weatherData.ranges,
+        type: "arearange",
+        lineWidth: 0,
+        linkedTo: ":previous",
+        color: Highcharts.getOptions().colors[0],
+        fillOpacity: 0.3,
+        zIndex: 0,
+        marker: {
+          enabled: false,
+        },
+      },
+    ],
+  }
+
+  weatherChart = new Highcharts.Chart(weatherChartOptions)
+}
+
+// Make API call to get fresh data and then refresh the weather chart
+async function updateWeatherChart(year, city) {
+  weatherData = await loadWeatherData(year, city)
+  weatherChart.series[0].update({ data: weatherData.averages })
+  weatherChart.series[1].update({ data: weatherData.ranges })
+  weatherChart.redraw()
+}
+
+// Make API call to get fresh data and then refresh the futures charts
+async function updateFuturesCharts(year) {
+  futuresData = await loadFuturesData(year)
+  atrChart.series[0].update({ data: futuresData.atr })
+  atrChart.redraw()
+  candlestickChart.series[0].update({ data: futuresData.candlestick })
+  candlestickChart.redraw()
+}
+
+// Load weather data from the API and return it formatted ready for Highcharts
+async function loadWeatherData(year, city) {
+  const cityURL = `http://127.0.0.1:5000/${year}/weather_data/${city}`
+  const response = await fetch(cityURL)
+  const data = await response.json()
+  return formatWeatherData(data, year, city)
+}
+
+// Load futures data from the API and return it formatted ready for Highcharts
+async function loadFuturesData(year) {
+  const futuresURL = `http://127.0.0.1:5000/${year}/futures_data`
+  const response = await fetch(futuresURL)
+  const data = await response.json()
+
+  const atr = data.map(function (row) {
+    return [new Date(row.Date).getTime(), row.ATR]
+  })
+
+  // map price data into properly formatted array and convert datetime to unix
+  const candlestick = data.map(function (row) {
+    return [
+      new Date(row.Date).getTime(),
+      row.Open,
+      row.High,
+      row.Low,
+      row.Adj_Close,
+    ]
+  })
+
+  return {
+    atr: atr,
+    candlestick: candlestick,
+  }
+}
+
+// Format the returned weather data from the API for consumption by Highcharts
+function formatWeatherData(cityData, year, city) {
+  // Determine the start and end dates for the winter season
+  const startDate = new Date(`${year}-12-01`)
+  const utcStartDate = Date.UTC(
+    startDate.getUTCFullYear(),
+    startDate.getUTCMonth(),
+    startDate.getUTCDate()
+  )
+
+  const endDate = new Date(year + 1, 2, 0) // Set the end date to the last day of February
+
+  const filteredData = cityData.filter((record) => {
+    const recordDate = new Date(record.date)
+    return recordDate >= startDate && recordDate <= endDate
+  })
+
+  const ranges = filteredData.map((record) => [
+    record.tmin !== null ? record.tmin : undefined,
+    record.tmax !== null ? record.tmax : undefined,
+  ])
+
+  const averages = filteredData.map((record) => record.tavg)
+
+  const data = {
+    ranges: ranges,
+    averages: averages,
+  }
+  return data
+}
+
+// Synchronize the extremes of the xAxis
+function syncExtremes(e) {
+  let chart = this.chart
+
+  if (e.trigger !== "syncExtremes") {
+    // Prevent feedback loop
+    // Loop through each chart and set the extremes
+    Highcharts.each(Highcharts.charts, function (ch) {
+      if (ch !== chart) {
+        if (ch.xAxis[0].setExtremes) {
+          ch.xAxis[0].setExtremes(e.min, e.max, undefined, false, {
+            trigger: "syncExtremes",
+          })
+        }
+      }
+    })
+  }
+}
