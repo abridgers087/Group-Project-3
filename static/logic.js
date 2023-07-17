@@ -349,7 +349,6 @@ function formatWeatherData(cityData, year, city) {
   )
 
   const endDate = new Date(year + 1, 2, 0) // Set the end date to the last day of February
-
   const filteredData = cityData.filter((record) => {
     const recordDate = new Date(record.date)
     return recordDate >= startDate && recordDate <= endDate

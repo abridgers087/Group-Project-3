@@ -17,9 +17,20 @@ CORS(app)  # Enable CORS for all routes
 def welcome():
     """List all available api routes."""
     return (
+        f"Cities available in dataset: Chicago, New York City, Los Angeles, Detroit, Columbus, Philadelphia, Newark, Houston, Indianapolis, Milwaukee<br/>"
+        f"<br/>"
+        f"Years available in dataset: 2011 - 2019*<br/>"
+        f"*Note: each year includes data spanning December (year) to February (year+1)<br/>"
+        f"<br/>"
         f"Available Routes:<br/>"
-        f"/<int:year>/weather_data/<city>"
-        f"/<int:year>/futures_data"        
+        f"Weather datasets: &nbsp&nbsp&nbsp/year/weather_data/city<br/>"
+        f"Futures datasets: &nbsp&nbsp&nbsp&nbsp/year/futures_data<br/>"
+        f"<br/>"
+        f"Example route for Houston temperature data for December 2012 - February 2013:<br/>"
+        f"/2012/weather_data/Houston/<br/>"
+        f"<br/>"
+        f"Example route for futures data for December 2016 - February 2017:<br/>"
+        f"/2016/futures_data"       
     )
 
 from datetime import datetime
@@ -50,31 +61,6 @@ def weather(city, year):
 
     # Return the weather data as JSON
     return jsonify(weather_list)
-
-# @app.route("/futures_data/Winter<int:winter_number>")
-# def futures(winter_number):
-#     winter_label = f"Winter {winter_number}"
-    
-#     # Query the futures data
-#     futures_data = db.futures_data.find({"Label": winter_label})
-
-#     # Convert the queried data into a list of dictionaries
-#     futures_list = []
-#     for data in futures_data:
-#         futures_list.append({
-#             'Winter': data['Label'],
-#             'Date': data['Date'],
-#             'Open': data['Open'],
-#             'High': data['High'],
-#             'Low': data['Low'],
-#             'Close': data['Close'],
-#             'Adj_Close': data['Adj_Close'],
-#             'Volume': data['Volume'],
-#             'ATR': data['ATR']
-#         })
-
-#     # Return the futures data as JSON
-#     return jsonify(futures_list)
 
 @app.route("/<int:year>/futures_data")
 def futures(year):
